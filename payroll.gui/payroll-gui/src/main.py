@@ -1,17 +1,20 @@
 from tkinter import Tk, StringVar, Label, Entry, Button, messagebox, Listbox, Scrollbar, END, Frame, Toplevel, LEFT, RIGHT, BOTH, Y, font
+
 from payroll import PayrollSystem
 
 class PayrollGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Payroll Accounting System")
-        self.master.geometry("500x500")
+        self.master.geometry("700x600")
+        self.master.configure(bg="#f0f4f8")  # soft background
         self.payroll_system = PayrollSystem()
 
-        # Define a bigger font
-        self.big_font = ("Arial", 14)
-        self.list_font = ("Arial", 13)
-        self.button_font = ("Arial", 13, "bold")
+        # Fonts
+        self.header_font = ("Segoe UI", 20, "bold")
+        self.label_font = ("Segoe UI", 14)
+        self.button_font = ("Segoe UI", 12, "bold")
+        self.list_font = ("Segoe UI", 12)
 
         self.emp_id_var = StringVar()
         self.name_var = StringVar()
@@ -24,42 +27,37 @@ class PayrollGUI:
         self.create_widgets()
 
     def create_widgets(self):
-        # Input Frame
-        input_frame = Frame(self.master, padx=10, pady=10)
-        input_frame.pack(fill='x')
+        # Header
+        Label(self.master, text="💼 Payroll Accounting System", font=self.header_font,
+              bg="#4a90e2", fg="white", pady=10).pack(fill='x')
 
-        Label(input_frame, text="Employee ID", font=self.big_font).grid(row=0, column=0, sticky='w')
-        Entry(input_frame, textvariable=self.emp_id_var, font=self.big_font).grid(row=0, column=1)
+        # Left frame (inputs)
+        input_frame = Frame(self.master, bg="white", bd=2, relief="ridge", padx=10, pady=10)
+        input_frame.place(relx=0.02, rely=0.08, relwidth=0.45, relheight=0.85)
 
-        Label(input_frame, text="Name", font=self.big_font).grid(row=1, column=0, sticky='w')
-        Entry(input_frame, textvariable=self.name_var, font=self.big_font).grid(row=1, column=1)
+        fields = ["Employee ID", "Name", "Basic Salary", "HRA", "Allowance", "PF Deduction", "Tax Deduction"]
+        self.entries = {}
+        for i, field in enumerate(fields):
+            Label(input_frame, text=field, font=self.label_font, bg="white").grid(row=i, column=0, sticky="w", pady=5)
+            entry = Entry(input_frame, font=self.label_font, bd=2, relief="solid")
+            entry.grid(row=i, column=1, pady=5)
+            self.entries[field] = entry
 
-        Label(input_frame, text="Basic Salary", font=self.big_font).grid(row=2, column=0, sticky='w')
-        Entry(input_frame, textvariable=self.basic_var, font=self.big_font).grid(row=2, column=1)
+        # Buttons
+        Button(input_frame, text="Add Employee", bg="#4CAF50", fg="white", font=self.button_font,
+               command=self.add_employee).grid(row=7, column=0, pady=10, padx=5)
+        Button(input_frame, text="Show Payslip", bg="#2196F3", fg="white", font=self.button_font,
+               command=self.show_payslip_popup).grid(row=7, column=1, pady=10, padx=5)
+        Button(input_frame, text="Clear", bg="#f44336", fg="white", font=self.button_font,
+               command=self.clear_entries).grid(row=8, column=0, columnspan=2, pady=5, sticky="we")
 
-        Label(input_frame, text="HRA", font=self.big_font).grid(row=3, column=0, sticky='w')
-        Entry(input_frame, textvariable=self.hra_var, font=self.big_font).grid(row=3, column=1)
+        # Right frame (employee list)
+        list_frame = Frame(self.master, bg="white", bd=2, relief="ridge")
+        list_frame.place(relx=0.50, rely=0.08, relwidth=0.48, relheight=0.85)
 
-        Label(input_frame, text="Allowance", font=self.big_font).grid(row=4, column=0, sticky='w')
-        Entry(input_frame, textvariable=self.allowance_var, font=self.big_font).grid(row=4, column=1)
-
-        Label(input_frame, text="PF Deduction", font=self.big_font).grid(row=5, column=0, sticky='w')
-        Entry(input_frame, textvariable=self.pf_var, font=self.big_font).grid(row=5, column=1)
-
-        Label(input_frame, text="Tax Deduction", font=self.big_font).grid(row=6, column=0, sticky='w')
-        Entry(input_frame, textvariable=self.tax_var, font=self.big_font).grid(row=6, column=1)
-
-        Button(input_frame, text="Add Employee", command=self.add_employee, bg="#4CAF50", fg="white", font=self.button_font).grid(row=7, column=0, pady=10)
-        Button(input_frame, text="Show Payslip", command=self.show_payslip_popup, bg="#2196F3", fg="white", font=self.button_font).grid(row=7, column=1, pady=10)
-        Button(input_frame, text="Clear", command=self.clear_entries, bg="#f44336", fg="white", font=self.button_font).grid(row=7, column=2, pady=10)
-
-        # Employee List Frame
-        list_frame = Frame(self.master, padx=10, pady=10)
-        list_frame.pack(fill=BOTH, expand=True)
-
-        Label(list_frame, text="Employees:", font=self.big_font).pack(anchor='w')
+        Label(list_frame, text="Employees:", font=self.label_font, bg="white").pack(anchor="w", padx=5, pady=5)
         self.employee_listbox = Listbox(list_frame, font=self.list_font)
-        self.employee_listbox.pack(side=LEFT, fill=BOTH, expand=True)
+        self.employee_listbox.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=5)
         self.employee_listbox.bind('<<ListboxSelect>>', self.on_employee_select)
 
         scrollbar = Scrollbar(list_frame)
@@ -67,17 +65,19 @@ class PayrollGUI:
         self.employee_listbox.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.employee_listbox.yview)
 
-        Button(self.master, text="Refresh List", command=self.list_employees, bg="#FFC107", font=self.button_font).pack(pady=5)
+        Button(self.master, text="Refresh List", bg="#FFC107", font=self.button_font,
+               command=self.list_employees).place(relx=0.50, rely=0.95, relwidth=0.48)
 
+    # Functions
     def add_employee(self):
         try:
-            emp_id = self.emp_id_var.get().strip()
-            name = self.name_var.get().strip()
-            basic = float(self.basic_var.get())
-            hra = float(self.hra_var.get())
-            allowance = float(self.allowance_var.get())
-            pf = float(self.pf_var.get())
-            tax = float(self.tax_var.get())
+            emp_id = self.entries["Employee ID"].get().strip()
+            name = self.entries["Name"].get().strip()
+            basic = float(self.entries["Basic Salary"].get())
+            hra = float(self.entries["HRA"].get())
+            allowance = float(self.entries["Allowance"].get())
+            pf = float(self.entries["PF Deduction"].get())
+            tax = float(self.entries["Tax Deduction"].get())
             if not emp_id or not name:
                 messagebox.showerror("Error", "Employee ID and Name are required.")
                 return
@@ -89,31 +89,27 @@ class PayrollGUI:
             self.clear_entries()
             self.list_employees()
         except ValueError:
-            messagebox.showerror("Error", "Please enter valid numeric values for salary and deductions.")
+            messagebox.showerror("Error", "Please enter valid numeric values.")
 
     def show_payslip_popup(self):
-        emp_id = self.emp_id_var.get().strip()
-        if not emp_id:
-            messagebox.showerror("Error", "Please enter an Employee ID.")
-            return
+        emp_id = self.entries["Employee ID"].get().strip()
         emp = self.payroll_system.employees.get(emp_id)
         if not emp:
             messagebox.showerror("Error", "Employee not found!")
             return
         gross, deductions, net = emp.calculate_salary()
         payslip = (
-            f"------------------- PAYSLIP -------------------\n"
-            f"Employee ID   : {emp.emp_id}\n"
-            f"Name          : {emp.name}\n"
-            f"Basic Salary  : {emp.basic}\n"
-            f"HRA           : {emp.hra}\n"
-            f"Allowance     : {emp.allowance}\n"
-            f"Gross Salary  : {gross}\n"
-            f"PF Deduction  : {emp.pf}\n"
-            f"TAX Deduction : {emp.tax}\n"
-            f"Total Deductions: {deductions}\n"
-            f"Net Salary    : {net}\n"
-            f"------------------------------------------------"
+            f"----- PAYSLIP -----\n"
+            f"Employee ID : {emp.emp_id}\n"
+            f"Name        : {emp.name}\n"
+            f"Basic       : {emp.basic}\n"
+            f"HRA         : {emp.hra}\n"
+            f"Allowance   : {emp.allowance}\n"
+            f"Gross       : {gross}\n"
+            f"PF Deduct   : {emp.pf}\n"
+            f"Tax Deduct  : {emp.tax}\n"
+            f"Net Salary  : {net}\n"
+            f"-------------------"
         )
         self.show_popup("Payslip", payslip)
 
@@ -124,13 +120,20 @@ class PayrollGUI:
             emp_id = self.employee_listbox.get(index).split(" - ")[0]
             emp = self.payroll_system.employees.get(emp_id)
             if emp:
-                self.emp_id_var.set(emp.emp_id)
-                self.name_var.set(emp.name)
-                self.basic_var.set(str(emp.basic))
-                self.hra_var.set(str(emp.hra))
-                self.allowance_var.set(str(emp.allowance))
-                self.pf_var.set(str(emp.pf))
-                self.tax_var.set(str(emp.tax))
+                self.entries["Employee ID"].delete(0, END)
+                self.entries["Employee ID"].insert(0, emp.emp_id)
+                self.entries["Name"].delete(0, END)
+                self.entries["Name"].insert(0, emp.name)
+                self.entries["Basic Salary"].delete(0, END)
+                self.entries["Basic Salary"].insert(0, str(emp.basic))
+                self.entries["HRA"].delete(0, END)
+                self.entries["HRA"].insert(0, str(emp.hra))
+                self.entries["Allowance"].delete(0, END)
+                self.entries["Allowance"].insert(0, str(emp.allowance))
+                self.entries["PF Deduction"].delete(0, END)
+                self.entries["PF Deduction"].insert(0, str(emp.pf))
+                self.entries["Tax Deduction"].delete(0, END)
+                self.entries["Tax Deduction"].insert(0, str(emp.tax))
 
     def list_employees(self):
         self.employee_listbox.delete(0, END)
@@ -138,19 +141,14 @@ class PayrollGUI:
             self.employee_listbox.insert(END, f"{emp_id} - {emp.name}")
 
     def clear_entries(self):
-        self.emp_id_var.set("")
-        self.name_var.set("")
-        self.basic_var.set("")
-        self.hra_var.set("")
-        self.allowance_var.set("")
-        self.pf_var.set("")
-        self.tax_var.set("")
+        for field in self.entries.values():
+            field.delete(0, END)
 
     def show_popup(self, title, message):
         popup = Toplevel(self.master)
         popup.title(title)
-        Label(popup, text=message, justify='left', padx=10, pady=10, font=("Courier", 14)).pack()
-        Button(popup, text="Close", command=popup.destroy, font=self.button_font).pack(pady=5)
+        Label(popup, text=message, justify="left", font=("Courier", 12), padx=10, pady=10).pack()
+        Button(popup, text="Close", command=popup.destroy).pack(pady=5)
 
 if __name__ == "__main__":
     root = Tk()
