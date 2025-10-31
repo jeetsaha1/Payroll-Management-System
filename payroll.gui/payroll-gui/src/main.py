@@ -48,8 +48,10 @@ class PayrollGUI:
                command=self.add_employee).grid(row=7, column=0, pady=10, padx=5)
         Button(input_frame, text="Show Payslip", bg="#2196F3", fg="white", font=self.button_font,
                command=self.show_payslip_popup).grid(row=7, column=1, pady=10, padx=5)
+        Button(input_frame, text="Delete Employee", bg="#d9534f", fg="white", font=self.button_font,
+               command=self.delete_employee).grid(row=7, column=2, pady=10, padx=5)
         Button(input_frame, text="Clear", bg="#f44336", fg="white", font=self.button_font,
-               command=self.clear_entries).grid(row=8, column=0, columnspan=2, pady=5, sticky="we")
+               command=self.clear_entries).grid(row=8, column=0, columnspan=3, pady=5, sticky="we")
 
         # Right frame (employee list)
         list_frame = Frame(self.master, bg="white", bd=2, relief="ridge")
@@ -149,6 +151,25 @@ class PayrollGUI:
         popup.title(title)
         Label(popup, text=message, justify="left", font=("Courier", 12), padx=10, pady=10).pack()
         Button(popup, text="Close", command=popup.destroy).pack(pady=5)
+
+    def delete_employee(self):
+        emp_id = self.entries["Employee ID"].get().strip()
+        if not emp_id:
+            messagebox.showerror("Error", "Enter/select Employee ID to delete.")
+            return
+        if emp_id not in self.payroll_system.employees:
+            messagebox.showerror("Error", "Employee not found.")
+            return
+        confirm = messagebox.askyesno("Confirm Delete", f"Delete employee {emp_id}? This cannot be undone.")
+        if not confirm:
+            return
+        deleted = self.payroll_system.delete_employee(emp_id)
+        if deleted:
+            messagebox.showinfo("Deleted", f"Employee {emp_id} deleted.")
+            self.clear_entries()
+            self.list_employees()
+        else:
+            messagebox.showerror("Error", "Failed to delete employee.")
 
 if __name__ == "__main__":
     root = Tk()
