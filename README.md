@@ -1,6 +1,6 @@
 # 💼 Payroll Accounting System
 
-![Payroll System Interface](d64a96e4-0850-409f-b82c-65887846ea77.png)
+
 
 ---
 
