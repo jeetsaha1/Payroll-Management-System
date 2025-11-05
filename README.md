@@ -50,8 +50,6 @@ Built with **Python and Tkinter**, it offers a visually appealing and intuitive 
 - Formula used:  
 Net Salary = Basic + Allowances - Deductions
 
-yaml
-Copy code
 
 #### 🧾 Payslip Generation Module
 - Instantly creates detailed payslips  
