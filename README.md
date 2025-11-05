@@ -42,7 +42,7 @@ Built with **Python and Tkinter**, it offers a visually appealing and intuitive 
 
 #### 🧍 Employee Management Module
 - Add, update, search, and delete employee records  
-- Store employee details like ID, name, designation, and joining date  
+- Store employee details like ID, name etc.
 
 #### 💰 Salary Calculation Module
 - Automatically calculates gross and net salaries  
